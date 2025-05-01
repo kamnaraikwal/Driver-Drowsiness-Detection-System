@@ -5,9 +5,27 @@ import tensorflow as tf
 from playsound import playsound
 import threading
 import time
+import os
+import requests
 
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1XDcuo7AmPKPlUmS83IWhOZ5y3cBWHbHt"
+MODEL_PATH = "driver_drowsiness_vgg16.h5"
 
-model = load_model('driver_drowsiness_vgg16.h5')
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading model...")
+        with requests.get(MODEL_URL, stream=True) as r:
+            r.raise_for_status()
+            with open(MODEL_PATH, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+        print("Download complete.")
+
+# for deployment
+download_model()
+
+model = load_model(MODEL_PATH)
+
 
 cap = cv2.VideoCapture(0)
 
